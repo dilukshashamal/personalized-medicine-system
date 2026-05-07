@@ -6,6 +6,8 @@ Helixora AI is a personalized medicine platform concept focused on helping clini
 
 The vision is simple: move beyond one-size-fits-all care and support a future where treatment decisions are informed by each individual’s biology and real-world health context.
 
+![Helixora AI](image/img1.png)
+
 ---
 
 ## Table of Contents
