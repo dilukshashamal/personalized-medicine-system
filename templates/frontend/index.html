@@ -8,267 +8,167 @@
     <link rel="stylesheet" href="{% static 'frontend/styles.css' %}" />
   </head>
   <body>
-    <div class="studio-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand__logo">H</div>
-          <div>
+    <div class="app-shell">
+      <aside class="rail">
+        <a class="brand" href="/">
+          <span class="brand__mark">H</span>
+          <span>
             <strong>Helixora AI</strong>
-            <p>Clinical intelligence studio</p>
-          </div>
-        </div>
+            <small>Precision care studio</small>
+          </span>
+        </a>
 
-        <nav class="sidebar__nav">
-          <a class="nav-item nav-item--active" href="/">
-            <span class="nav-item__icon">✦</span>
+        <nav class="rail__nav" aria-label="Primary">
+          <a class="rail-link rail-link--active" href="/">
+            <span class="rail-link__icon">H</span>
             <span>Home</span>
           </a>
-          <a class="nav-item" href="/workspace/">
-            <span class="nav-item__icon">◉</span>
+          <a class="rail-link" href="/workspace/">
+            <span class="rail-link__icon">W</span>
             <span>Workspace</span>
           </a>
-          <a class="nav-item" href="/admin/">
-            <span class="nav-item__icon">⌘</span>
+          <a class="rail-link" href="/admin/">
+            <span class="rail-link__icon">A</span>
             <span>Admin</span>
           </a>
         </nav>
 
-        <div class="sidebar-card">
-          <span class="sidebar-card__label">Experience status</span>
-          <strong>{{ experience_status.headline }}</strong>
-          <p>{{ experience_status.summary }}</p>
+        <div class="rail-note">
+          <strong>Clinical decision support</strong>
+          <span>Drafts require qualified clinician review before action.</span>
         </div>
       </aside>
 
-      <main class="studio-main">
-        <header class="topbar">
+      <main class="page-main">
+        <header class="studio-topbar">
           <div>
-            <div class="topbar__eyebrow">Personalized medicine workspace</div>
-            <h1>Build, review, and trace recommendation workflows.</h1>
-            <p class="hero-subtitle">
-              Turn complex patient and genomic context into a clear,
-              clinician-ready decision-support workspace with guided review,
-              evidence visibility, and safer next actions.
-            </p>
+            <p class="eyebrow">Personalized medicine workspace</p>
+            <h1>Helixora AI</h1>
           </div>
-          <div class="topbar__actions">
-            <div class="topbar__status">
-              <span class="live-dot"></span>
-              <span>{{ health.status|title }}</span>
-            </div>
-            <div class="user-badge">HA</div>
+          <div class="topbar-actions">
+            <a class="button button--quiet" href="/admin/">Admin</a>
+            <a class="button button--primary" href="/workspace/">New draft</a>
           </div>
         </header>
 
-        <section class="prompt-panel">
-          <div class="hero-orb hero-orb--one"></div>
-          <div class="hero-orb hero-orb--two"></div>
-          <div class="prompt-panel__content">
-            <div class="prompt-panel__label">Clinical orchestration prompt</div>
-            <h2>
-              What would you like Helixora AI to prepare for clinician review?
-            </h2>
+        <section class="hero-stage">
+          <div class="hero-copy">
+            <p class="eyebrow">Clinician-guided recommendation drafting</p>
+            <h2>Turn patient context into a reviewable treatment support draft.</h2>
             <p>
-              Surface explainable treatment support, highlight missing data, and
-              keep every recommendation auditable before any human action.
+              Combine clinical history, genomic signals, and safety checks in a
+              focused workspace built for review, traceability, and next-step clarity.
             </p>
-          </div>
-          <div class="chip-row">
-            <span class="chip">Summarize biomarkers</span>
-            <span class="chip">Highlight missing data</span>
-            <span class="chip">Prepare clinician draft</span>
-            <span class="chip">Show review blockers</span>
-          </div>
-          <div class="prompt-box">
-            <div class="composer-toolbar">
-              <span class="composer-pill composer-pill--active">Prompt</span>
-              <span class="composer-pill">Context</span>
-              <span class="composer-pill">Safety</span>
+            <div class="hero-actions">
+              <a class="button button--primary" href="/workspace/">Open workspace</a>
+              <a class="button button--secondary" href="/admin/">Review records</a>
             </div>
-            <div class="prompt-box__input">
-              <span class="prompt-box__placeholder"
-                >Ask Helixora AI to generate a clinician-ready recommendation
-                draft...</span
-              >
-              <p>
-                Summarize patient context, detect genomic signals, surface
-                uncertainty, and prepare a safe recommendation draft.
-              </p>
+          </div>
+          <div class="dna-visual dna-visual--hero" aria-hidden="true">
+            <div class="dna-orbit dna-orbit--one"></div>
+            <div class="dna-orbit dna-orbit--two"></div>
+            <div class="dna-stream">
+              {% for item in "123456789012" %}
+              <span class="dna-rung"></span>
+              {% endfor %}
             </div>
-            <div class="prompt-box__actions">
-              <a class="button button--primary" href="/admin/">Open admin</a>
-              <a class="button button--ghost" href="/workspace/"
-                >Launch recommendation workspace</a
-              >
-              <button class="icon-button" type="button">+</button>
+            <div class="signal-lines">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div class="dna-core">
+              <strong>AI</strong>
+              <span>clinical reasoning</span>
             </div>
           </div>
         </section>
 
-        <section class="metric-row">
-          <article class="metric-tile">
+        <section class="metric-strip" aria-label="Workspace overview">
+          <article>
             <span>Patients</span>
             <strong>{{ stats.patients }}</strong>
           </article>
-          <article class="metric-tile">
-            <span>Recommendations</span>
+          <article>
+            <span>Drafts</span>
             <strong>{{ stats.recommendations }}</strong>
           </article>
-          <article class="metric-tile metric-tile--accent">
-            <span>Pending reviews</span>
+          <article>
+            <span>Pending review</span>
             <strong>{{ stats.pending_reviews }}</strong>
           </article>
-          <article class="metric-tile">
+          <article>
             <span>Audit events</span>
             <strong>{{ stats.audit_events }}</strong>
           </article>
         </section>
 
-        <section class="feature-strip">
-          <article class="feature-card">
-            <span class="section-tag">Clinician flow</span>
-            <h3>Built for guided review</h3>
-            <p>
-              Recommendations stay in draft mode until a clinician reviews
-              limitations, missing data, and rationale.
-            </p>
-          </article>
-          <article class="feature-card">
-            <span class="section-tag">Explainability</span>
-            <h3>Evidence stays visible</h3>
-            <p>
-              Surface biomarkers, confidence, and review blockers without
-              exposing developer-facing payloads to end users.
-            </p>
-          </article>
-          <article class="feature-card">
-            <span class="section-tag">Readiness</span>
-            <h3>Actionable user entry points</h3>
-            <p>
-              Guide users into the recommendation workspace instead of raw
-              system endpoints or diagnostic pages.
-            </p>
-          </article>
-        </section>
-
-        <section class="workspace-grid">
-          <section class="surface-card surface-card--large">
-            <div class="surface-card__header">
+        <section class="dashboard-grid">
+          <div class="workspace-panel workspace-panel--wide">
+            <div class="panel-heading">
               <div>
-                <span class="section-tag">Recommendations</span>
-                <h3>Latest decision-support drafts</h3>
+                <p class="eyebrow">Recent drafts</p>
+                <h3>Recommendation workspace</h3>
               </div>
-              <span class="section-meta">Decision support only</span>
-            </div>
-
-            <div class="tab-row">
-              <span class="tab tab--active">Output</span>
-              <span class="tab">Reasoning</span>
-              <span class="tab">Review state</span>
+              <a class="text-link" href="/workspace/">Create draft</a>
             </div>
 
             {% if latest_recommendations %}
-            <div class="workspace-list">
+            <div class="draft-list">
               {% for recommendation in latest_recommendations %}
-              <article class="workspace-item">
+              <article class="draft-row">
                 <div>
                   <h4>{{ recommendation.title }}</h4>
                   <p>Patient {{ recommendation.patient.external_id }}</p>
                 </div>
                 <div class="token-group">
-                  <span class="token"
-                    >{{ recommendation.get_status_display }}</span
-                  >
-                  <span class="token token--muted"
-                    >{{ recommendation.get_confidence_level_display }}</span
-                  >
+                  <span class="status-pill">{{ recommendation.get_status_display }}</span>
+                  <span class="status-pill status-pill--muted">
+                    {{ recommendation.get_confidence_level_display }}
+                  </span>
                 </div>
               </article>
               {% endfor %}
             </div>
             {% else %}
-            <p class="empty-state">No recommendation drafts yet.</p>
+            <div class="empty-state">
+              <strong>No drafts yet</strong>
+              <span>Start with a patient profile and genomic context.</span>
+            </div>
             {% endif %}
-          </section>
+          </div>
 
-          <section class="workspace-side">
-            <div class="surface-card">
-              <div class="surface-card__header">
-                <div>
-                  <span class="section-tag">Workspace readiness</span>
-                  <h3>Operational overview</h3>
-                </div>
-              </div>
-              <ul class="detail-list">
-                <li>
-                  <span>Deployment profile</span
-                  ><strong>{{ health.environment|title }}</strong>
-                </li>
-                <li>
-                  <span>Background tasks</span
-                  ><strong
-                    >{% if health.celery.broker_configured %}Ready{% else
-                    %}Setup needed{% endif %}</strong
-                  >
-                </li>
-                <li>
-                  <span>Automation mode</span
-                  ><strong
-                    >{% if health.celery.task_always_eager %}Immediate
-                    processing{% else %}Queued processing{% endif %}</strong
-                  >
-                </li>
-              </ul>
-            </div>
-
-            <div class="surface-card quick-panel">
-              <div class="surface-card__header">
-                <div>
-                  <span class="section-tag">Quick actions</span>
-                  <h3>Suggested next steps</h3>
-                </div>
-              </div>
-              <div class="quick-actions">
-                <a class="quick-action" href="/admin/">
-                  <strong>Review patient records</strong>
-                  <span>Open admin workspace</span>
-                </a>
-                <a class="quick-action" href="/workspace/">
-                  <strong>Start recommendation workflow</strong>
-                  <span>Open clinician-facing generation workspace</span>
-                </a>
+          <aside class="workspace-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Review flow</p>
+                <h3>Production-ready path</h3>
               </div>
             </div>
-
-            <div class="surface-card">
-              <div class="surface-card__header">
+            <ol class="review-steps">
+              <li>
+                <span>1</span>
                 <div>
-                  <span class="section-tag">Audit</span>
-                  <h3>Recent activity</h3>
+                  <strong>Collect context</strong>
+                  <p>Patient, clinical, medication, allergy, and genomic data.</p>
                 </div>
-              </div>
-              {% if latest_audit_events %}
-              <div class="audit-list">
-                {% for event in latest_audit_events %}
-                <article class="audit-item">
-                  <span class="audit-item__dot"></span>
-                  <div>
-                    <h4>{{ event.get_event_type_display }}</h4>
-                    <p>
-                      {% if event.patient %}Patient {{ event.patient.external_id
-                      }} · {% endif %} {{ event.created_at|date:"Y-m-d H:i" }}
-                    </p>
-                  </div>
-                </article>
-                {% endfor %}
-              </div>
-              {% else %}
-              <p class="empty-state">
-                Audit events will appear as workflows run.
-              </p>
-              {% endif %}
-            </div>
-          </section>
+              </li>
+              <li>
+                <span>2</span>
+                <div>
+                  <strong>Generate draft</strong>
+                  <p>Structured recommendation with rationale and uncertainty.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
+                <div>
+                  <strong>Clinician review</strong>
+                  <p>Human decision remains the required final step.</p>
+                </div>
+              </li>
+            </ol>
+          </aside>
         </section>
       </main>
     </div>

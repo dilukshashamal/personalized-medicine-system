@@ -4,165 +4,153 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Helixora AI Workspace</title>
+    <title>Recommendation Workspace | Helixora AI</title>
     <link rel="stylesheet" href="{% static 'frontend/styles.css' %}" />
   </head>
   <body>
-    <div class="studio-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand__logo">H</div>
-          <div>
+    <div class="app-shell">
+      <aside class="rail">
+        <a class="brand" href="/">
+          <span class="brand__mark">H</span>
+          <span>
             <strong>Helixora AI</strong>
-            <p>Clinical intelligence studio</p>
-          </div>
-        </div>
+            <small>Precision care studio</small>
+          </span>
+        </a>
 
-        <nav class="sidebar__nav">
-          <a class="nav-item" href="/">
-            <span class="nav-item__icon">✦</span>
+        <nav class="rail__nav" aria-label="Primary">
+          <a class="rail-link" href="/">
+            <span class="rail-link__icon">H</span>
             <span>Home</span>
           </a>
-          <a class="nav-item nav-item--active" href="/workspace/">
-            <span class="nav-item__icon">◉</span>
+          <a class="rail-link rail-link--active" href="/workspace/">
+            <span class="rail-link__icon">W</span>
             <span>Workspace</span>
           </a>
-          <a class="nav-item" href="/admin/">
-            <span class="nav-item__icon">⌘</span>
+          <a class="rail-link" href="/admin/">
+            <span class="rail-link__icon">A</span>
             <span>Admin</span>
           </a>
         </nav>
 
-        <div class="sidebar-card">
-          <span class="sidebar-card__label">Experience status</span>
-          <strong>{{ experience_status.headline }}</strong>
-          <p>{{ experience_status.summary }}</p>
-          <p class="provider-note">
-            AI provider:
-            <strong>{{ provider_status.active_provider|upper }}</strong>
-          </p>
+        <a class="new-prompt" href="/workspace/">New recommendation draft</a>
+
+        <div class="rail-note">
+          <strong>Review required</strong>
+          <span>Outputs are draft decision support, not autonomous care orders.</span>
         </div>
       </aside>
 
-      <main class="studio-main">
-        <header class="topbar">
+      <main class="workspace-main">
+        <header class="studio-topbar studio-topbar--compact">
           <div>
-            <div class="topbar__eyebrow">Recommendation workspace</div>
-            <h1>Generate a structured treatment support draft.</h1>
+            <p class="eyebrow">Treatment recommendation prompt</p>
+            <h1>Workspace</h1>
           </div>
-          <div class="topbar__actions">
-            <div class="topbar__status">
-              <span class="live-dot"></span>
-              <span>{{ health.status|title }}</span>
-            </div>
-            <div class="user-badge">MD</div>
+          <div class="topbar-actions">
+            <span class="mode-chip">Clinical draft</span>
+            <span class="user-avatar">MD</span>
           </div>
         </header>
 
-        <section class="workspace-grid workspace-grid--form">
-          <section class="surface-card surface-card--large">
-            <div class="surface-card__header">
-              <div>
-                <span class="section-tag">Input</span>
-                <h3>Clinical and genomic context</h3>
-              </div>
-            </div>
-
-            <form method="post" class="workspace-form">
+        <div class="studio-layout">
+          <section class="prompt-column">
+            <form method="post" class="studio-form">
               {% csrf_token %}
-              <div class="form-grid">
-                {% for field in form %}
-                <div
-                  class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %}"
-                >
-                  <label for="{{ field.id_for_label }}"
-                    >{{ field.label }}</label
-                  >
-                  {{ field }} {% if field.help_text %}<small
-                    >{{ field.help_text }}</small
-                  >{% endif %} {% for error in field.errors %}
-                  <p class="field-error">{{ error }}</p>
+              <section class="prompt-section">
+                <div class="section-heading">
+                  <p class="eyebrow">System guidance</p>
+                  <h2>Prepare a structured recommendation for clinician review.</h2>
+                </div>
+                <p class="guidance-copy">
+                  The draft should explain rationale, flag missing data, and keep
+                  contraindication warnings visible for human review.
+                </p>
+              </section>
+
+              <section class="prompt-section">
+                <div class="section-heading">
+                  <p class="eyebrow">Patient context</p>
+                  <h2>Clinical input</h2>
+                </div>
+                <div class="form-grid">
+                  {% for field in form %}
+                  {% if field.name != "gene_symbol" and field.name != "variant" and field.name != "clinical_significance" and field.name != "is_actionable" and field.name != "evidence_summary" %}
+                  <div class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
+                    <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
                   {% endfor %}
                 </div>
-                {% endfor %}
-              </div>
-              <div class="prompt-box__actions">
-                <button class="button button--primary" type="submit">
-                  Generate draft
-                </button>
+              </section>
+
+              <section class="prompt-section">
+                <div class="section-heading">
+                  <p class="eyebrow">Genomic context</p>
+                  <h2>Evidence input</h2>
+                </div>
+                <div class="form-grid">
+                  {% for field in form %}
+                  {% if field.name == "gene_symbol" or field.name == "variant" or field.name == "clinical_significance" or field.name == "is_actionable" or field.name == "evidence_summary" %}
+                  <div class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %} {% if field.name == 'is_actionable' %}form-field--inline{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
+                    <p class="field-error">{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              </section>
+
+              <div class="composer-bar">
+                <div>
+                  <strong>Generate treatment support draft</strong>
+                  <span>Creates rationale, confidence, risks, and review blockers.</span>
+                </div>
+                <button class="button button--primary" type="submit">Run</button>
               </div>
             </form>
-          </section>
 
-          <section class="workspace-side">
-            <div class="surface-card">
-              <div class="surface-card__header">
+            <section class="response-panel">
+              <div class="panel-heading">
                 <div>
-                  <span class="section-tag">AI provider</span>
-                  <h3>Provider status</h3>
-                </div>
-              </div>
-              <ul class="detail-list">
-                <li>
-                  <span>Configured provider</span
-                  ><strong
-                    >{{ provider_status.configured_provider|title }}</strong
-                  >
-                </li>
-                <li>
-                  <span>Active provider</span
-                  ><strong>{{ provider_status.active_provider|title }}</strong>
-                </li>
-                <li>
-                  <span>Gemini access</span
-                  ><strong
-                    >{% if provider_status.gemini_api_key_present %}Available{%
-                    else %}Not configured{% endif %}</strong
-                  >
-                </li>
-                <li>
-                  <span>Gemini model</span
-                  ><strong>{{ provider_status.gemini_model }}</strong>
-                </li>
-              </ul>
-            </div>
-
-            <div class="surface-card">
-              <div class="surface-card__header">
-                <div>
-                  <span class="section-tag">Output</span>
-                  <h3>Latest workflow result</h3>
+                  <p class="eyebrow">Output</p>
+                  <h3>Latest draft</h3>
                 </div>
               </div>
 
               {% if workflow_result %}
-              <div class="result-block">
-                <h4>{{ workflow_result.recommendation.title }}</h4>
-                <p>{{ workflow_result.recommendation.summary }}</p>
-                <ul class="detail-stack">
-                  <li>
-                    <span>Status</span
-                    ><strong
-                      >{{ workflow_result.recommendation.get_status_display
-                      }}</strong
-                    >
-                  </li>
-                  <li>
-                    <span>Confidence</span
-                    ><strong
-                      >{{
-                      workflow_result.recommendation.get_confidence_level_display
-                      }}</strong
-                    >
-                  </li>
-                  <li>
-                    <span>Risk</span
-                    ><strong
-                      >{{ workflow_result.recommendation.get_risk_level_display
-                      }}</strong
-                    >
-                  </li>
-                </ul>
+              <article class="result-output">
+                <header>
+                  <div>
+                    <h4>{{ workflow_result.recommendation.title }}</h4>
+                    <p>{{ workflow_result.recommendation.summary }}</p>
+                  </div>
+                  <span class="status-pill">{{ workflow_result.recommendation.get_status_display }}</span>
+                </header>
+
+                <div class="result-metrics">
+                  <span>
+                    <small>Confidence</small>
+                    <strong>{{ workflow_result.recommendation.get_confidence_level_display }}</strong>
+                  </span>
+                  <span>
+                    <small>Risk</small>
+                    <strong>{{ workflow_result.recommendation.get_risk_level_display }}</strong>
+                  </span>
+                  <span>
+                    <small>Review</small>
+                    <strong>{% if workflow_result.recommendation.clinician_review_required %}Required{% else %}Optional{% endif %}</strong>
+                  </span>
+                </div>
 
                 <div class="result-section">
                   <h5>Rationale</h5>
@@ -171,70 +159,129 @@
 
                 <div class="result-section">
                   <h5>Warnings</h5>
-                  {% if workflow_result.recommendation.contraindication_warnings
-                  %}
-                  <ul class="bullet-list">
-                    {% for item in
-                    workflow_result.recommendation.contraindication_warnings %}
+                  {% if workflow_result.recommendation.contraindication_warnings %}
+                  <ul>
+                    {% for item in workflow_result.recommendation.contraindication_warnings %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
                   {% else %}
-                  <p>No specific contraindication warnings.</p>
+                  <p>No contraindication warnings were detected in the submitted context.</p>
                   {% endif %}
                 </div>
 
                 <div class="result-section">
                   <h5>Missing data</h5>
                   {% if workflow_result.recommendation.missing_data_flags %}
-                  <ul class="bullet-list">
-                    {% for item in
-                    workflow_result.recommendation.missing_data_flags %}
+                  <ul>
+                    {% for item in workflow_result.recommendation.missing_data_flags %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
                   {% else %}
-                  <p>No missing-data flags detected.</p>
+                  <p>No missing-data blockers were detected.</p>
                   {% endif %}
                 </div>
-              </div>
-              {% else %}
-              <p class="empty-state">
-                Submit patient and genomic context to generate a recommendation
-                draft.
-              </p>
-              {% endif %}
-            </div>
 
-            <div class="surface-card">
-              <div class="surface-card__header">
+                <div class="result-section review-report">
+                  <h5>Review report</h5>
+                  <div class="result-metrics">
+                    <span>
+                      <small>Decision</small>
+                      <strong>{{ workflow_result.recommendation.clinical_review.get_decision_display }}</strong>
+                    </span>
+                    <span>
+                      <small>Limitations</small>
+                      <strong>{% if workflow_result.recommendation.clinical_review.limitations_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
+                    </span>
+                    <span>
+                      <small>Missing data</small>
+                      <strong>{% if workflow_result.recommendation.clinical_review.missing_data_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
+                    </span>
+                  </div>
+                  <p>{{ workflow_result.recommendation.intended_use_notice }}</p>
+                </div>
+              </article>
+              {% else %}
+              <div class="empty-state">
+                <strong>No draft generated in this session</strong>
+                <span>Complete the clinical input and run the workspace.</span>
+              </div>
+              {% endif %}
+            </section>
+          </section>
+
+          <aside class="settings-column">
+            <section class="settings-panel">
+              <div class="panel-heading">
                 <div>
-                  <span class="section-tag">Recent recommendations</span>
-                  <h3>Generated drafts</h3>
+                  <p class="eyebrow">Run settings</p>
+                  <h3>Review controls</h3>
+                </div>
+              </div>
+              <div class="setting-list">
+                <div class="setting-row">
+                  <span>Output type</span>
+                  <strong>Treatment support draft</strong>
+                </div>
+                <div class="setting-row">
+                  <span>Review gate</span>
+                  <strong>Clinician required</strong>
+                </div>
+                <div class="setting-row">
+                  <span>Safety checks</span>
+                  <strong>Warnings and missing data</strong>
+                </div>
+                <div class="setting-row">
+                  <span>Traceability</span>
+                  <strong>Audit event captured</strong>
+                </div>
+              </div>
+            </section>
+
+            <section class="settings-panel visual-panel">
+              <div class="dna-visual dna-visual--compact" aria-hidden="true">
+                <div class="dna-orbit dna-orbit--one"></div>
+                <div class="dna-stream">
+                  {% for item in "12345678" %}
+                  <span class="dna-rung"></span>
+                  {% endfor %}
+                </div>
+                <div class="dna-core">
+                  <strong>AI</strong>
+                </div>
+              </div>
+              <div>
+                <p class="eyebrow">Clinical intelligence</p>
+                <h3>Input to recommendation</h3>
+              </div>
+            </section>
+
+            <section class="settings-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Generated drafts</p>
+                  <h3>Recent work</h3>
                 </div>
               </div>
               {% if latest_recommendations %}
-              <div class="workspace-list">
+              <div class="compact-list">
                 {% for recommendation in latest_recommendations %}
-                <article class="workspace-item">
-                  <div>
-                    <h4>{{ recommendation.title }}</h4>
-                    <p>Patient {{ recommendation.patient.external_id }}</p>
-                  </div>
-                  <div class="token-group">
-                    <span class="token"
-                      >{{ recommendation.get_status_display }}</span
-                    >
-                  </div>
+                <article>
+                  <strong>{{ recommendation.title }}</strong>
+                  <span>Patient {{ recommendation.patient.external_id }}</span>
                 </article>
                 {% endfor %}
               </div>
               {% else %}
-              <p class="empty-state">No drafts generated yet.</p>
+              <div class="empty-state empty-state--small">
+                <strong>No recent drafts</strong>
+                <span>Generated drafts will appear here.</span>
+              </div>
               {% endif %}
-            </div>
-          </section>
-        </section>
+            </section>
+          </aside>
+        </div>
       </main>
     </div>
   </body>

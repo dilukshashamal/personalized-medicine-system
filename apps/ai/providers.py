@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import json
 import logging
 import os
+import re
 
 
 logger = logging.getLogger(__name__)
@@ -91,40 +92,90 @@ class PlaceholderRecommendationProvider(BaseRecommendationProvider):
 class GeminiRecommendationProvider(BaseRecommendationProvider):
 	provider_name = 'gemini'
 
-	def __init__(self, api_key: str, model: str = 'gemini-1.5-pro'):
+	def __init__(self, api_key: str, model: str = 'gemini-2.5-flash'):
 		self.api_key = api_key
 		self.model = model
 
 	def _build_prompt(self, *, patient_payload: dict, genomic_payload: dict | None) -> str:
 		return (
-			'You are generating a clinical decision support draft, not final medical advice. '
-			'Return only valid JSON with fields: summary, rationale, suggested_options, evidence_references, '
-			'uncertainty_notes, missing_data_flags, contraindication_warnings. '
-			'Be conservative, surface uncertainty, and require clinician review. '
 			f'Patient data: {json.dumps(patient_payload)}. '
 			f'Genomic data: {json.dumps(genomic_payload or {})}.'
 		)
 
 	def _call_gemini(self, prompt: str) -> dict:
 		try:
-			import google.generativeai as genai
+			from google import genai
+			from google.genai import types
+			from pydantic import BaseModel, Field
 		except ImportError as exc:
-			raise RuntimeError('google-generativeai is not installed') from exc
+			raise RuntimeError('google-genai is not installed') from exc
 
-		genai.configure(api_key=self.api_key)
-		model = genai.GenerativeModel(self.model)
-		response = model.generate_content(prompt)
+		class RecommendationOption(BaseModel):
+			label: str = ''
+			description: str = ''
+
+		class EvidenceReference(BaseModel):
+			type: str = ''
+			gene_symbol: str = ''
+			variant: str = ''
+			clinical_significance: str = ''
+
+		class GeminiRecommendationPayload(BaseModel):
+			summary: str = ''
+			rationale: str = ''
+			suggested_options: list[RecommendationOption] = Field(default_factory=list)
+			evidence_references: list[EvidenceReference] = Field(default_factory=list)
+			uncertainty_notes: str = ''
+			missing_data_flags: list[str] = Field(default_factory=list)
+			contraindication_warnings: list[str] = Field(default_factory=list)
+
+		client = genai.Client(
+			api_key=self.api_key,
+			http_options=types.HttpOptions(timeout=30000),
+		)
+		response = client.models.generate_content(
+			model=self.model,
+			contents=prompt,
+			config=types.GenerateContentConfig(
+				systemInstruction=(
+					'You are generating a clinical decision support draft, not final medical advice. '
+					'Return only valid JSON with fields: summary, rationale, suggested_options, evidence_references, '
+					'uncertainty_notes, missing_data_flags, contraindication_warnings. '
+					'Be conservative, surface uncertainty, and require clinician review.'
+				),
+				responseMimeType='application/json',
+				responseSchema=GeminiRecommendationPayload,
+				temperature=0.2,
+				maxOutputTokens=1200,
+			),
+		)
+		parsed = getattr(response, 'parsed', None)
+		if parsed:
+			if hasattr(parsed, 'model_dump'):
+				return parsed.model_dump()
+			if isinstance(parsed, dict):
+				return parsed
+
 		text = getattr(response, 'text', '') or ''
 		if not text:
 			raise RuntimeError('Gemini returned an empty response')
 
-		text = text.strip()
-		if text.startswith('```'):
-			text = text.strip('`')
-			if text.lower().startswith('json'):
-				text = text[4:].strip()
+		text = self._extract_json_text(text)
 
 		return json.loads(text)
+
+	def _extract_json_text(self, text: str) -> str:
+		text = text.strip()
+		fenced_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, flags=re.IGNORECASE | re.DOTALL)
+		if fenced_match:
+			return fenced_match.group(1).strip()
+
+		start = text.find('{')
+		end = text.rfind('}')
+		if start != -1 and end != -1 and end > start:
+			return text[start : end + 1].strip()
+
+		return text
 
 	def generate(self, *, patient_payload: dict, genomic_payload: dict | None = None) -> AIProviderResult:
 		payload = self._call_gemini(self._build_prompt(patient_payload=patient_payload, genomic_payload=genomic_payload))
@@ -145,7 +196,7 @@ class GeminiRecommendationProvider(BaseRecommendationProvider):
 def get_recommendation_provider() -> BaseRecommendationProvider:
 	provider_name = os.getenv('HELIXORA_AI_PROVIDER', 'placeholder').strip().lower()
 	gemini_api_key = os.getenv('GEMINI_API_KEY', '').strip()
-	gemini_model = os.getenv('GEMINI_MODEL', 'gemini-1.5-pro').strip() or 'gemini-1.5-pro'
+	gemini_model = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
 
 	if provider_name == 'gemini' and gemini_api_key:
 		try:
@@ -159,7 +210,7 @@ def get_recommendation_provider() -> BaseRecommendationProvider:
 def get_provider_status() -> dict:
 	provider_name = os.getenv('HELIXORA_AI_PROVIDER', 'placeholder').strip().lower()
 	gemini_api_key_present = bool(os.getenv('GEMINI_API_KEY', '').strip())
-	gemini_model = os.getenv('GEMINI_MODEL', 'gemini-1.5-pro').strip() or 'gemini-1.5-pro'
+	gemini_model = os.getenv('GEMINI_MODEL', 'gemini-2.5-flash').strip() or 'gemini-2.5-flash'
 
 	active_provider = 'placeholder'
 	if provider_name == 'gemini' and gemini_api_key_present:

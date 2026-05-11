@@ -1,8 +1,6 @@
 from django.views.generic import FormView, TemplateView
 
-from apps.ai.providers import get_provider_status
 from apps.ai.workflow import run_recommendation_workflow
-from apps.api.health import get_health_status
 from apps.api.forms import RecommendationWorkspaceForm
 from apps.audit.models import AuditEvent
 from apps.patients.models import PatientProfile
@@ -15,11 +13,6 @@ class LandingPageView(TemplateView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['health'] = get_health_status()
-		context['experience_status'] = {
-			'headline': 'Workspace available',
-			'summary': 'Clinical recommendation drafting, review workflow, and audit tracking are ready.',
-		}
 		context['stats'] = {
 			'patients': PatientProfile.objects.count(),
 			'recommendations': TreatmentRecommendation.objects.count(),
@@ -30,7 +23,6 @@ class LandingPageView(TemplateView):
 		}
 		context['latest_recommendations'] = TreatmentRecommendation.objects.select_related('patient')[:5]
 		context['latest_audit_events'] = AuditEvent.objects.select_related('patient', 'recommendation')[:6]
-		context['provider_status'] = get_provider_status()
 		return context
 
 
@@ -40,16 +32,10 @@ class RecommendationWorkspaceView(FormView):
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
-		context['health'] = get_health_status()
-		context['experience_status'] = {
-			'headline': 'Ready for clinician-guided drafting',
-			'summary': 'Enter patient and genomic context to generate a structured, reviewable recommendation draft.',
-		}
 		context['latest_recommendations'] = TreatmentRecommendation.objects.select_related(
 			'patient', 'primary_genomic_insight'
 		)[:5]
 		context['latest_audit_events'] = AuditEvent.objects.select_related('patient', 'recommendation')[:6]
-		context['provider_status'] = get_provider_status()
 		context['full_width_fields'] = self.form_class.FULL_WIDTH_FIELDS
 		return context
 

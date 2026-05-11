@@ -60,7 +60,10 @@ class ClinicalReviewSerializerTests(TestCase):
 		review.limitations_acknowledged = True
 		review.missing_data_acknowledged = True
 		review.save()
+		self.recommendation.refresh_from_db()
 
+		self.assertEqual(self.recommendation.status, TreatmentRecommendation.Status.APPROVED)
+		self.assertIsNotNone(review.reviewed_at)
 		self.assertTrue(
 			AuditEvent.objects.filter(
 				recommendation=self.recommendation,

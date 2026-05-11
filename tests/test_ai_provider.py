@@ -7,7 +7,7 @@ from apps.ai.providers import PlaceholderRecommendationProvider, get_provider_st
 
 class AIProviderSelectionTests(SimpleTestCase):
 	def test_placeholder_provider_is_default(self):
-		with patch.dict('os.environ', {}, clear=False):
+		with patch.dict('os.environ', {'HELIXORA_AI_PROVIDER': '', 'GEMINI_API_KEY': ''}, clear=False):
 			provider = get_recommendation_provider()
 
 		self.assertIsInstance(provider, PlaceholderRecommendationProvider)

@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 from django.test import TestCase
 from django.urls import reverse
 
 from apps.patients.models import PatientProfile
 from apps.recommendations.models import TreatmentRecommendation
+from apps.reviews.models import ClinicalReview
 
 
 class RecommendationWorkspaceTests(TestCase):
@@ -10,28 +13,58 @@ class RecommendationWorkspaceTests(TestCase):
 		response = self.client.get(reverse('recommendation-workspace'))
 
 		self.assertEqual(response.status_code, 200)
-		self.assertContains(response, 'Generate a structured treatment support draft.')
-		self.assertContains(response, 'Ready for clinician-guided drafting')
+		self.assertContains(response, 'Prepare a structured recommendation for clinician review.')
+		self.assertContains(response, 'Review controls')
 
 	def test_workspace_submission_creates_patient_and_recommendation(self):
-		response = self.client.post(
-			reverse('recommendation-workspace'),
-			data={
-				'external_id': 'P-9001',
-				'consent_status': 'granted',
-				'diagnoses': 'Metastatic lung cancer',
-				'medications': 'Warfarin',
-				'allergies': 'None known',
-				'clinical_notes_summary': 'Progressive disease after first-line therapy.',
-				'gene_symbol': 'EGFR',
-				'variant': 'L858R',
-				'clinical_significance': 'high',
-				'is_actionable': 'on',
-				'evidence_summary': 'Known actionable alteration.',
-			},
-		)
+		with patch.dict('os.environ', {'HELIXORA_AI_PROVIDER': 'placeholder'}, clear=False):
+			response = self.client.post(
+				reverse('recommendation-workspace'),
+				data={
+					'external_id': 'P-9001',
+					'consent_status': 'granted',
+					'diagnoses': 'Metastatic lung cancer',
+					'medications': 'Warfarin',
+					'allergies': 'None known',
+					'clinical_notes_summary': 'Progressive disease after first-line therapy.',
+					'gene_symbol': 'EGFR',
+					'variant': 'L858R',
+					'clinical_significance': 'high',
+					'is_actionable': 'on',
+					'evidence_summary': 'Known actionable alteration.',
+				},
+			)
 
 		self.assertEqual(response.status_code, 200)
 		self.assertTrue(PatientProfile.objects.filter(external_id='P-9001').exists())
 		self.assertEqual(TreatmentRecommendation.objects.count(), 1)
 		self.assertContains(response, 'Personalized treatment review for P-9001')
+		self.assertContains(response, 'Review report')
+		self.assertEqual(ClinicalReview.objects.count(), 1)
+
+	def test_workspace_submission_updates_existing_patient(self):
+		PatientProfile.objects.create(external_id='P-9002', diagnoses=['Earlier diagnosis'])
+
+		with patch.dict('os.environ', {'HELIXORA_AI_PROVIDER': 'placeholder'}, clear=False):
+			for note in ['First submission', 'Updated submission']:
+				response = self.client.post(
+					reverse('recommendation-workspace'),
+					data={
+						'external_id': 'P-9002',
+						'consent_status': 'granted',
+						'diagnoses': 'Metastatic lung cancer',
+						'medications': 'Warfarin',
+						'allergies': 'None known',
+						'clinical_notes_summary': note,
+						'gene_symbol': 'EGFR',
+						'variant': 'L858R',
+						'clinical_significance': 'high',
+						'is_actionable': 'on',
+						'evidence_summary': 'Known actionable alteration.',
+					},
+				)
+				self.assertEqual(response.status_code, 200)
+
+		self.assertEqual(PatientProfile.objects.filter(external_id='P-9002').count(), 1)
+		self.assertEqual(PatientProfile.objects.get(external_id='P-9002').clinical_notes_summary, 'Updated submission')
+		self.assertEqual(TreatmentRecommendation.objects.filter(patient__external_id='P-9002').count(), 2)

@@ -2,6 +2,26 @@ import os
 from pathlib import Path
 
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+
+def load_env_file(path: Path):
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+        name, value = line.split('=', 1)
+        name = name.strip()
+        value = value.strip().strip('"').strip("'")
+        os.environ.setdefault(name, value)
+
+
+load_env_file(BASE_DIR / '.env')
+
+
 def get_env(name: str, default=None, required: bool = False):
     value = os.getenv(name, default)
     if required and (value is None or value == ''):
@@ -20,8 +40,6 @@ def get_list_env(name: str, default: str = '') -> list[str]:
     value = os.getenv(name, default)
     return [item.strip() for item in value.split(',') if item.strip()]
 
-
-BASE_DIR = Path(__file__).resolve().parents[2]
 
 ENVIRONMENT = get_env('DJANGO_ENV', 'local')
 

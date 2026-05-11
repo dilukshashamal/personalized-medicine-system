@@ -3,11 +3,25 @@ from django.dispatch import receiver
 
 from apps.audit.models import AuditEvent
 from apps.audit.services import create_audit_event
+from apps.recommendations.models import TreatmentRecommendation
 from apps.reviews.models import ClinicalReview
 
 
 @receiver(post_save, sender=ClinicalReview)
 def create_review_audit_event(sender, instance, created, **kwargs):
+	status_map = {
+		ClinicalReview.Decision.NEEDS_REVIEW: TreatmentRecommendation.Status.NEEDS_REVIEW,
+		ClinicalReview.Decision.APPROVED: TreatmentRecommendation.Status.APPROVED,
+		ClinicalReview.Decision.OVERRIDDEN: TreatmentRecommendation.Status.OVERRIDDEN,
+		ClinicalReview.Decision.REJECTED: TreatmentRecommendation.Status.REJECTED,
+	}
+	recommendation_status = status_map.get(instance.decision)
+	if recommendation_status and instance.recommendation.status != recommendation_status:
+		TreatmentRecommendation.objects.filter(pk=instance.recommendation_id).update(
+			status=recommendation_status,
+			updated_at=instance.updated_at,
+		)
+
 	if created:
 		return
 

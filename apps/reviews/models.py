@@ -2,6 +2,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class ClinicalReview(models.Model):
@@ -42,3 +43,8 @@ class ClinicalReview(models.Model):
 
 	def __str__(self):
 		return f'Review for {self.recommendation.title}'
+
+	def save(self, *args, **kwargs):
+		if self.decision != self.Decision.NEEDS_REVIEW and self.reviewed_at is None:
+			self.reviewed_at = timezone.now()
+		super().save(*args, **kwargs)
