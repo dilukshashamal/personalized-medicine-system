@@ -8,6 +8,7 @@ from apps.patients.models import PatientProfile
 from apps.recommendations.models import TreatmentRecommendation
 from apps.reviews.models import ClinicalReview
 
+from .health import get_health_status
 from .permissions import IsAuthenticatedReadWrite
 from .serializers import (
 	AuditEventSerializer,
@@ -23,13 +24,7 @@ class HealthCheckView(APIView):
 	authentication_classes = []
 
 	def get(self, request):
-		return Response(
-			{
-				'status': 'ok',
-				'service': 'helixora-api',
-				'framework': 'django-drf-celery',
-			}
-		)
+		return Response(get_health_status())
 
 
 class PatientProfileViewSet(viewsets.ModelViewSet):
