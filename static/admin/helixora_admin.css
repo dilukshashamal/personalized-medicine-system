@@ -31,8 +31,11 @@
   --delete-button-hover-bg: #8f1c13;
   --object-tools-bg: #2563eb;
   --object-tools-hover-bg: #174bd6;
-  --font-family-primary: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-family-monospace: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  --font-family-primary:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --font-family-monospace:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
 }
 
 html[data-theme="dark"],
@@ -57,7 +60,11 @@ html[data-theme="dark"],
 
 body {
   background:
-    linear-gradient(180deg, rgba(232, 240, 255, 0.82), rgba(247, 249, 252, 0) 34rem),
+    linear-gradient(
+      180deg,
+      rgba(232, 240, 255, 0.82),
+      rgba(247, 249, 252, 0) 34rem
+    ),
     var(--body-bg);
   font-family: var(--font-family-primary);
 }
@@ -178,7 +185,12 @@ div.breadcrumbs {
   border: 1px solid var(--border-color);
   border-radius: 14px;
   background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.95) 48%, rgba(238, 247, 245, 0.9)),
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(255, 255, 255, 0.95) 48%,
+      rgba(238, 247, 245, 0.9)
+    ),
     #ffffff;
   box-shadow: 0 22px 60px rgba(30, 41, 59, 0.12);
 }
@@ -226,7 +238,10 @@ div.breadcrumbs {
   color: #172033 !important;
   font-weight: 800;
   text-decoration: none;
-  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .helixora-admin-button:hover {
@@ -438,7 +453,11 @@ div.help li {
   place-items: center;
   min-height: 100vh;
   background:
-    linear-gradient(180deg, rgba(232, 240, 255, 0.82), rgba(247, 249, 252, 0) 34rem),
+    linear-gradient(
+      180deg,
+      rgba(232, 240, 255, 0.82),
+      rgba(247, 249, 252, 0) 34rem
+    ),
     #f7f9fc;
 }
 

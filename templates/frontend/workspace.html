@@ -37,7 +37,10 @@
 
         <div class="rail-note">
           <strong>Review required</strong>
-          <span>Outputs are draft decision support, not autonomous care orders.</span>
+          <span
+            >Outputs are draft decision support, not autonomous care
+            orders.</span
+          >
         </div>
       </aside>
 
@@ -60,11 +63,13 @@
               <section class="prompt-section">
                 <div class="section-heading">
                   <p class="eyebrow">System guidance</p>
-                  <h2>Prepare a structured recommendation for clinician review.</h2>
+                  <h2>
+                    Prepare a structured recommendation for clinician review.
+                  </h2>
                 </div>
                 <p class="guidance-copy">
-                  The draft should explain rationale, flag missing data, and keep
-                  contraindication warnings visible for human review.
+                  The draft should explain rationale, flag missing data, and
+                  keep contraindication warnings visible for human review.
                 </p>
               </section>
 
@@ -74,18 +79,23 @@
                   <h2>Clinical input</h2>
                 </div>
                 <div class="form-grid">
-                  {% for field in form %}
-                  {% if field.name != "gene_symbol" and field.name != "variant" and field.name != "clinical_significance" and field.name != "is_actionable" and field.name != "evidence_summary" %}
-                  <div class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %}">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-                    {% for error in field.errors %}
+                  {% for field in form %} {% if field.name != "gene_symbol" and
+                  field.name != "variant" and field.name !=
+                  "clinical_significance" and field.name != "is_actionable" and
+                  field.name != "evidence_summary" %}
+                  <div
+                    class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %}"
+                  >
+                    <label for="{{ field.id_for_label }}"
+                      >{{ field.label }}</label
+                    >
+                    {{ field }} {% if field.help_text %}<small
+                      >{{ field.help_text }}</small
+                    >{% endif %} {% for error in field.errors %}
                     <p class="field-error">{{ error }}</p>
                     {% endfor %}
                   </div>
-                  {% endif %}
-                  {% endfor %}
+                  {% endif %} {% endfor %}
                 </div>
               </section>
 
@@ -95,27 +105,37 @@
                   <h2>Evidence input</h2>
                 </div>
                 <div class="form-grid">
-                  {% for field in form %}
-                  {% if field.name == "gene_symbol" or field.name == "variant" or field.name == "clinical_significance" or field.name == "is_actionable" or field.name == "evidence_summary" %}
-                  <div class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %} {% if field.name == 'is_actionable' %}form-field--inline{% endif %}">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-                    {% for error in field.errors %}
+                  {% for field in form %} {% if field.name == "gene_symbol" or
+                  field.name == "variant" or field.name ==
+                  "clinical_significance" or field.name == "is_actionable" or
+                  field.name == "evidence_summary" %}
+                  <div
+                    class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %} {% if field.name == 'is_actionable' %}form-field--inline{% endif %}"
+                  >
+                    <label for="{{ field.id_for_label }}"
+                      >{{ field.label }}</label
+                    >
+                    {{ field }} {% if field.help_text %}<small
+                      >{{ field.help_text }}</small
+                    >{% endif %} {% for error in field.errors %}
                     <p class="field-error">{{ error }}</p>
                     {% endfor %}
                   </div>
-                  {% endif %}
-                  {% endfor %}
+                  {% endif %} {% endfor %}
                 </div>
               </section>
 
               <div class="composer-bar">
                 <div>
                   <strong>Generate treatment support draft</strong>
-                  <span>Creates rationale, confidence, risks, and review blockers.</span>
+                  <span
+                    >Creates rationale, confidence, risks, and review
+                    blockers.</span
+                  >
                 </div>
-                <button class="button button--primary" type="submit">Run</button>
+                <button class="button button--primary" type="submit">
+                  Run
+                </button>
               </div>
             </form>
 
@@ -134,25 +154,41 @@
                     <h4>{{ workflow_result.recommendation.title }}</h4>
                     <p>{{ workflow_result.recommendation.summary }}</p>
                   </div>
-                  <span class="status-pill">{{ workflow_result.recommendation.get_status_display }}</span>
+                  <span class="status-pill"
+                    >{{ workflow_result.recommendation.get_status_display
+                    }}</span
+                  >
                 </header>
 
                 <div class="result-metrics">
                   <span>
                     <small>AI provider</small>
-                    <strong>{{ workflow_result.recommendation.generated_by }}</strong>
+                    <strong
+                      >{{ workflow_result.recommendation.generated_by }}</strong
+                    >
                   </span>
                   <span>
                     <small>Confidence</small>
-                    <strong>{{ workflow_result.recommendation.get_confidence_level_display }}</strong>
+                    <strong
+                      >{{
+                      workflow_result.recommendation.get_confidence_level_display
+                      }}</strong
+                    >
                   </span>
                   <span>
                     <small>Risk</small>
-                    <strong>{{ workflow_result.recommendation.get_risk_level_display }}</strong>
+                    <strong
+                      >{{ workflow_result.recommendation.get_risk_level_display
+                      }}</strong
+                    >
                   </span>
                   <span>
                     <small>Review</small>
-                    <strong>{% if workflow_result.recommendation.clinician_review_required %}Required{% else %}Optional{% endif %}</strong>
+                    <strong
+                      >{% if
+                      workflow_result.recommendation.clinician_review_required
+                      %}Required{% else %}Optional{% endif %}</strong
+                    >
                   </span>
                 </div>
 
@@ -163,14 +199,19 @@
 
                 <div class="result-section">
                   <h5>Warnings</h5>
-                  {% if workflow_result.recommendation.contraindication_warnings %}
+                  {% if workflow_result.recommendation.contraindication_warnings
+                  %}
                   <ul>
-                    {% for item in workflow_result.recommendation.contraindication_warnings %}
+                    {% for item in
+                    workflow_result.recommendation.contraindication_warnings %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
                   {% else %}
-                  <p>No contraindication warnings were detected in the submitted context.</p>
+                  <p>
+                    No contraindication warnings were detected in the submitted
+                    context.
+                  </p>
                   {% endif %}
                 </div>
 
@@ -178,7 +219,8 @@
                   <h5>Missing data</h5>
                   {% if workflow_result.recommendation.missing_data_flags %}
                   <ul>
-                    {% for item in workflow_result.recommendation.missing_data_flags %}
+                    {% for item in
+                    workflow_result.recommendation.missing_data_flags %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
@@ -192,18 +234,32 @@
                   <div class="result-metrics">
                     <span>
                       <small>Decision</small>
-                      <strong>{{ workflow_result.recommendation.clinical_review.get_decision_display }}</strong>
+                      <strong
+                        >{{
+                        workflow_result.recommendation.clinical_review.get_decision_display
+                        }}</strong
+                      >
                     </span>
                     <span>
                       <small>Limitations</small>
-                      <strong>{% if workflow_result.recommendation.clinical_review.limitations_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
+                      <strong
+                        >{% if
+                        workflow_result.recommendation.clinical_review.limitations_acknowledged
+                        %}Acknowledged{% else %}Pending{% endif %}</strong
+                      >
                     </span>
                     <span>
                       <small>Missing data</small>
-                      <strong>{% if workflow_result.recommendation.clinical_review.missing_data_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
+                      <strong
+                        >{% if
+                        workflow_result.recommendation.clinical_review.missing_data_acknowledged
+                        %}Acknowledged{% else %}Pending{% endif %}</strong
+                      >
                     </span>
                   </div>
-                  <p>{{ workflow_result.recommendation.intended_use_notice }}</p>
+                  <p>
+                    {{ workflow_result.recommendation.intended_use_notice }}
+                  </p>
                 </div>
               </article>
               {% else %}
