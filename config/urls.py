@@ -19,6 +19,10 @@ from django.urls import include, path
 
 from apps.api.frontend_views import LandingPageView, RecommendationWorkspaceView
 
+admin.site.site_header = 'Helixora Clinical Operations'
+admin.site.site_title = 'Helixora Admin'
+admin.site.index_title = 'Clinical Decision Support Administration'
+
 urlpatterns = [
     path('', LandingPageView.as_view(), name='landing-page'),
     path('workspace/', RecommendationWorkspaceView.as_view(), name='recommendation-workspace'),

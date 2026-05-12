@@ -3,9 +3,33 @@ from django.contrib import admin
 from .models import ClinicalReview
 
 
+@admin.action(description='Mark selected reviews as needs review')
+def mark_reviews_needing_review(modeladmin, request, queryset):
+	queryset.update(decision=ClinicalReview.Decision.NEEDS_REVIEW)
+
+
 @admin.register(ClinicalReview)
 class ClinicalReviewAdmin(admin.ModelAdmin):
-	list_display = ('recommendation', 'decision', 'reviewer', 'reviewed_at', 'updated_at')
-	list_filter = ('decision',)
+	list_display = (
+		'recommendation',
+		'decision',
+		'reviewer',
+		'limitations_acknowledged',
+		'missing_data_acknowledged',
+		'reviewed_at',
+		'updated_at',
+	)
+	list_filter = ('decision', 'limitations_acknowledged', 'missing_data_acknowledged', 'reviewed_at')
 	search_fields = ('recommendation__title', 'recommendation__patient__external_id')
-	readonly_fields = ('created_at', 'updated_at')
+	readonly_fields = ('id', 'created_at', 'updated_at', 'reviewed_at')
+	autocomplete_fields = ('recommendation', 'reviewer')
+	list_select_related = ('recommendation', 'recommendation__patient', 'reviewer')
+	date_hierarchy = 'updated_at'
+	list_per_page = 30
+	actions = (mark_reviews_needing_review,)
+	fieldsets = (
+		('Linkage', {'fields': ('id', 'recommendation', 'reviewer')}),
+		('Decision', {'fields': ('decision', 'review_notes', 'override_reason')}),
+		('Safety Acknowledgements', {'fields': ('limitations_acknowledged', 'missing_data_acknowledged')}),
+		('Timestamps', {'fields': ('reviewed_at', 'created_at', 'updated_at')}),
+	)
