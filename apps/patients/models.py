@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -50,6 +51,12 @@ class PatientProfile(models.Model):
 	lifestyle_factors = models.JSONField(default=dict, blank=True)
 	disease_progression_summary = models.JSONField(default=dict, blank=True)
 	clinical_notes_summary = models.TextField(blank=True)
+	authorized_users = models.ManyToManyField(
+		settings.AUTH_USER_MODEL,
+		blank=True,
+		related_name='authorized_patient_profiles',
+		help_text='Users explicitly authorized to access this patient record.',
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 

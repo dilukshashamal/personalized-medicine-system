@@ -44,7 +44,9 @@ class IsClinicalApiAuthorized(BasePermission):
 		return self._has_role(user, allowed_roles) or self._has_perm(user, model, action)
 
 	def has_object_permission(self, request, view, obj):
-		return self.has_permission(request, view)
+		if not self.has_permission(request, view):
+			return False
+		return self._has_patient_scope(request.user, obj)
 
 	def _get_model(self, view):
 		queryset = getattr(view, 'queryset', None)
@@ -61,6 +63,25 @@ class IsClinicalApiAuthorized(BasePermission):
 
 	def _has_role(self, user, role_names):
 		return user.groups.filter(name__in=role_names).exists()
+
+	def _has_patient_scope(self, user, obj):
+		if user.is_superuser or self._has_role(user, self.admin_roles):
+			return True
+
+		patient = self._get_patient_from_object(obj)
+		if patient is None:
+			return False
+		return patient.authorized_users.filter(pk=user.pk).exists()
+
+	def _get_patient_from_object(self, obj):
+		if hasattr(obj, 'authorized_users'):
+			return obj
+		if hasattr(obj, 'patient'):
+			return obj.patient
+		recommendation = getattr(obj, 'recommendation', None)
+		if recommendation is not None:
+			return recommendation.patient
+		return None
 
 	def _has_perm(self, user, model, action):
 		permission = f'{model._meta.app_label}.{action}_{model._meta.model_name}'

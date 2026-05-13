@@ -127,12 +127,25 @@ class PatientApiTests(APITestCase):
 	def test_clinical_reader_group_can_read_patients(self):
 		group = Group.objects.create(name='clinical_reader')
 		self.reader_user.groups.add(group)
+		self.patient.authorized_users.add(self.reader_user)
 		self.client.force_authenticate(user=self.reader_user)
 
 		response = self.client.get(reverse('patient-profile-list'))
 
 		self.assertEqual(response.status_code, status.HTTP_200_OK)
 		self.assertEqual(response.data[0]['external_id'], self.patient.external_id)
+
+	def test_clinical_reader_group_cannot_read_unassigned_patients(self):
+		group = Group.objects.create(name='clinical_reader')
+		self.reader_user.groups.add(group)
+		self.client.force_authenticate(user=self.reader_user)
+
+		list_response = self.client.get(reverse('patient-profile-list'))
+		detail_response = self.client.get(reverse('patient-profile-detail', kwargs={'pk': self.patient.pk}))
+
+		self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+		self.assertEqual(list_response.data, [])
+		self.assertEqual(detail_response.status_code, status.HTTP_404_NOT_FOUND)
 
 	def test_non_staff_user_cannot_create_patient(self):
 		self.client.force_authenticate(user=self.reader_user)
@@ -158,6 +171,8 @@ class PatientApiTests(APITestCase):
 
 		self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 		self.assertEqual(response.data['external_id'], 'P-EDITOR')
+		patient = PatientProfile.objects.get(external_id='P-EDITOR')
+		self.assertTrue(patient.authorized_users.filter(pk=self.reader_user.pk).exists())
 
 	def test_user_with_model_add_permission_can_create_patient(self):
 		permission = Permission.objects.get(

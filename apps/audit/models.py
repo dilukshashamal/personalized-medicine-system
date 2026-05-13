@@ -35,6 +35,7 @@ class AuditEvent(models.Model):
 		RECOMMENDATION_CREATED = 'recommendation_created', 'Recommendation Created'
 		RECOMMENDATION_UPDATED = 'recommendation_updated', 'Recommendation Updated'
 		RECOMMENDATION_REVIEW_REQUESTED = 'recommendation_review_requested', 'Recommendation Review Requested'
+		AI_PROVIDER_REQUESTED = 'ai_provider_requested', 'AI Provider Requested'
 		REVIEW_SUBMITTED = 'review_submitted', 'Review Submitted'
 		REVIEW_APPROVED = 'review_approved', 'Review Approved'
 		REVIEW_OVERRIDDEN = 'review_overridden', 'Review Overridden'

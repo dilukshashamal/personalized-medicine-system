@@ -156,6 +156,32 @@ def _derive_risk_level(provider_result) -> str:
 	return TreatmentRecommendation.RiskLevel.LOW
 
 
+def _upsert_patient(*, external_id: str, patient_data: dict, actor=None):
+	patient = PatientProfile.objects.filter(external_id=external_id).first()
+	defaults = {key: value for key, value in patient_data.items() if key != 'external_id'}
+	if patient is None:
+		patient = PatientProfile(external_id=external_id, **defaults)
+	else:
+		for key, value in defaults.items():
+			setattr(patient, key, value)
+
+	patient.full_clean()
+	patient.save()
+	if actor and getattr(actor, 'is_authenticated', False):
+		patient.authorized_users.add(actor)
+	return patient
+
+
+def _create_genomic_insight(*, patient, genomic_data: dict | None):
+	if not genomic_data or not genomic_data.get('gene_symbol') or not genomic_data.get('variant'):
+		return None
+
+	genomic_insight = GenomicInsight(patient=patient, **genomic_data)
+	genomic_insight.full_clean()
+	genomic_insight.save()
+	return genomic_insight
+
+
 def run_recommendation_workflow(*, patient_data: dict, genomic_data: dict | None = None, actor=None, correlation_id: str = ''):
 	external_id = patient_data['external_id']
 	ensure_ai_consent_status(patient_data.get('consent_status'))
@@ -163,9 +189,22 @@ def run_recommendation_workflow(*, patient_data: dict, genomic_data: dict | None
 	if existing_patient:
 		ensure_patient_ai_consent(existing_patient)
 
-	genomic_insight = None
+	with transaction.atomic():
+		patient = _upsert_patient(external_id=external_id, patient_data=patient_data, actor=actor)
+		ensure_patient_ai_consent(patient)
+		genomic_insight = _create_genomic_insight(patient=patient, genomic_data=genomic_data)
+		provider = get_recommendation_provider()
+		create_audit_event(
+			event_type=AuditEvent.EventType.AI_PROVIDER_REQUESTED,
+			patient=patient,
+			actor=actor,
+			correlation_id=correlation_id,
+			metadata={
+				'provider': provider.provider_name,
+				'has_genomic_payload': bool(genomic_data),
+			},
+		)
 
-	provider = get_recommendation_provider()
 	used_fallback = False
 	try:
 		provider_result = provider.generate(patient_payload=patient_data, genomic_payload=genomic_data)
@@ -191,15 +230,6 @@ def run_recommendation_workflow(*, patient_data: dict, genomic_data: dict | None
 		)
 
 	with transaction.atomic():
-		patient, _created = PatientProfile.objects.update_or_create(
-			external_id=external_id,
-			defaults={key: value for key, value in patient_data.items() if key != 'external_id'},
-		)
-		ensure_patient_ai_consent(patient)
-
-		if genomic_data and genomic_data.get('gene_symbol') and genomic_data.get('variant'):
-			genomic_insight = GenomicInsight.objects.create(patient=patient, **genomic_data)
-
 		recommendation = generate_recommendation(
 			patient=patient,
 			actor=actor,

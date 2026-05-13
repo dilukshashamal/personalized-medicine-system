@@ -17,7 +17,18 @@ class TreatmentRecommendationAdmin(admin.ModelAdmin):
 	)
 	list_filter = ('status', 'confidence_level', 'risk_level', 'clinician_review_required', 'generated_by', 'updated_at')
 	search_fields = ('title', 'patient__external_id', 'summary')
-	readonly_fields = ('id', 'intended_use_notice', 'created_at', 'updated_at')
+	readonly_fields = (
+		'id',
+		'status',
+		'confidence_level',
+		'risk_level',
+		'clinician_review_required',
+		'generated_by',
+		'model_version',
+		'intended_use_notice',
+		'created_at',
+		'updated_at',
+	)
 	autocomplete_fields = ('patient', 'primary_genomic_insight')
 	list_select_related = ('patient', 'primary_genomic_insight')
 	ordering = ('-updated_at',)

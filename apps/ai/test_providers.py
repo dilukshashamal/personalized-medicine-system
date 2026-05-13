@@ -1,7 +1,10 @@
 import json
+from datetime import timedelta
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.ai.providers import AIProviderResult, GeminiRecommendationProvider, get_recommendation_provider
 from apps.ai.workflow import RecommendationConsentError, run_recommendation_workflow
@@ -174,6 +177,24 @@ class GeminiProviderTests(TestCase):
 		get_provider.assert_not_called()
 		self.assertEqual(TreatmentRecommendation.objects.count(), 0)
 		self.assertFalse(PatientProfile.objects.filter(external_id='P-CONSENT-MISSING').exists())
+
+	def test_workflow_validates_patient_before_provider_call(self):
+		with patch('apps.ai.workflow.get_recommendation_provider') as get_provider:
+			with self.assertRaises(ValidationError):
+				run_recommendation_workflow(
+					patient_data={
+						'external_id': 'P-INVALID-BEFORE-AI',
+						'date_of_birth': timezone.localdate() + timedelta(days=1),
+						'consent_status': 'granted',
+						'diagnoses': ['Condition A'],
+						'medications': ['Medication A'],
+						'allergies': ['None known'],
+					},
+				)
+
+		get_provider.assert_not_called()
+		self.assertFalse(PatientProfile.objects.filter(external_id='P-INVALID-BEFORE-AI').exists())
+		self.assertEqual(TreatmentRecommendation.objects.count(), 0)
 
 	def test_workflow_normalizes_empty_provider_options_to_review_required_output(self):
 		class EmptyOptionsProvider:
