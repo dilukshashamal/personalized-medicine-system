@@ -79,23 +79,22 @@
                   <h2>Clinical input</h2>
                 </div>
                 <div class="form-grid">
-                  {% for field in form %} {% if field.name != "gene_symbol" and
-                  field.name != "variant" and field.name !=
-                  "clinical_significance" and field.name != "is_actionable" and
-                  field.name != "evidence_summary" %}
+                  {% for field in form %}
+                  {% if field.name != "gene_symbol" and field.name != "variant" and field.name != "clinical_significance" and field.name != "is_actionable" and field.name != "evidence_summary" %}
                   <div
                     class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %}"
                   >
                     <label for="{{ field.id_for_label }}"
                       >{{ field.label }}</label
                     >
-                    {{ field }} {% if field.help_text %}<small
-                      >{{ field.help_text }}</small
-                    >{% endif %} {% for error in field.errors %}
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
                     <p class="field-error">{{ error }}</p>
                     {% endfor %}
                   </div>
-                  {% endif %} {% endfor %}
+                  {% endif %}
+                  {% endfor %}
                 </div>
               </section>
 
@@ -105,23 +104,22 @@
                   <h2>Evidence input</h2>
                 </div>
                 <div class="form-grid">
-                  {% for field in form %} {% if field.name == "gene_symbol" or
-                  field.name == "variant" or field.name ==
-                  "clinical_significance" or field.name == "is_actionable" or
-                  field.name == "evidence_summary" %}
+                  {% for field in form %}
+                  {% if field.name == "gene_symbol" or field.name == "variant" or field.name == "clinical_significance" or field.name == "is_actionable" or field.name == "evidence_summary" %}
                   <div
                     class="form-field {% if field.name in full_width_fields %}form-field--full{% endif %} {% if field.name == 'is_actionable' %}form-field--inline{% endif %}"
                   >
                     <label for="{{ field.id_for_label }}"
                       >{{ field.label }}</label
                     >
-                    {{ field }} {% if field.help_text %}<small
-                      >{{ field.help_text }}</small
-                    >{% endif %} {% for error in field.errors %}
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
                     <p class="field-error">{{ error }}</p>
                     {% endfor %}
                   </div>
-                  {% endif %} {% endfor %}
+                  {% endif %}
+                  {% endfor %}
                 </div>
               </section>
 
@@ -184,11 +182,7 @@
                   </span>
                   <span>
                     <small>Review</small>
-                    <strong
-                      >{% if
-                      workflow_result.recommendation.clinician_review_required
-                      %}Required{% else %}Optional{% endif %}</strong
-                    >
+                    <strong>{% if workflow_result.recommendation.clinician_review_required %}Required{% else %}Optional{% endif %}</strong>
                   </span>
                 </div>
 
@@ -199,11 +193,9 @@
 
                 <div class="result-section">
                   <h5>Warnings</h5>
-                  {% if workflow_result.recommendation.contraindication_warnings
-                  %}
+                  {% if workflow_result.recommendation.contraindication_warnings %}
                   <ul>
-                    {% for item in
-                    workflow_result.recommendation.contraindication_warnings %}
+                    {% for item in workflow_result.recommendation.contraindication_warnings %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
@@ -219,8 +211,7 @@
                   <h5>Missing data</h5>
                   {% if workflow_result.recommendation.missing_data_flags %}
                   <ul>
-                    {% for item in
-                    workflow_result.recommendation.missing_data_flags %}
+                    {% for item in workflow_result.recommendation.missing_data_flags %}
                     <li>{{ item }}</li>
                     {% endfor %}
                   </ul>
@@ -242,19 +233,11 @@
                     </span>
                     <span>
                       <small>Limitations</small>
-                      <strong
-                        >{% if
-                        workflow_result.recommendation.clinical_review.limitations_acknowledged
-                        %}Acknowledged{% else %}Pending{% endif %}</strong
-                      >
+                      <strong>{% if workflow_result.recommendation.clinical_review.limitations_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
                     </span>
                     <span>
                       <small>Missing data</small>
-                      <strong
-                        >{% if
-                        workflow_result.recommendation.clinical_review.missing_data_acknowledged
-                        %}Acknowledged{% else %}Pending{% endif %}</strong
-                      >
+                      <strong>{% if workflow_result.recommendation.clinical_review.missing_data_acknowledged %}Acknowledged{% else %}Pending{% endif %}</strong>
                     </span>
                   </div>
                   <p>

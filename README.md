@@ -32,6 +32,7 @@ The vision is simple: move beyond one-size-fits-all care and support a future wh
 - [Benefits](#benefits)
 - [Product Vision](#product-vision)
 - [Responsible AI and Compliance Considerations](#responsible-ai-and-compliance-considerations)
+- [Engineering Readiness Priorities](#engineering-readiness-priorities)
 - [Future Enhancements](#future-enhancements)
 - [Project Status](#project-status)
 - [License](#license)
@@ -518,6 +519,62 @@ Because healthcare is a high-stakes domain, Helixora AI should be built with str
 - medical disclaimer and intended-use boundaries
 - consent and data governance practices
 - secure infrastructure and access control
+
+---
+
+## Engineering Readiness Priorities
+
+Helixora AI is currently an early-stage clinical decision-support foundation. Before treating it as healthcare-production-ready, the following engineering controls should be implemented and verified.
+
+### Access control and identity
+
+- Define explicit clinical roles such as clinician, reviewer, administrator, researcher, and service account.
+- Move beyond broad staff-based write permissions toward role-based or attribute-based access controls.
+- Ensure every sensitive mutation has an accountable actor or service identity.
+- Add patient-scoped access rules before exposing real patient or genomic records.
+
+### Consent and data governance
+
+- Enforce consent status in patient ingestion, recommendation generation, AI provider calls, exports, and analytics.
+- Classify data by sensitivity: identifiable patient data, genomic data, clinical context, derived recommendation output, audit metadata, and de-identified test fixtures.
+- Keep lineage visible from submitted inputs through generated recommendation, clinical review, and audit events.
+- Define retention, deletion, de-identification, and data-minimization rules before storing real regulated data.
+
+### AI safety and evidence grounding
+
+- Keep AI output bounded to clinical decision support, never autonomous medical advice.
+- Require structured output with rationale, uncertainty, missing-data flags, contraindication warnings, and clinician-review status.
+- Distinguish source evidence, model inference, and suggested next steps in every clinician-facing output.
+- Add evidence citation and retrieval controls before making condition- or treatment-specific claims.
+- Preserve safe fallback behavior when Gemini or any future AI provider is unavailable, slow, malformed, or low confidence.
+
+### Audit integrity and review workflow
+
+- Treat recommendation creation, update, review, approval, override, rejection, export, and sensitive access as audit events.
+- Make audit history append-only from normal application paths.
+- Capture correlation IDs across API requests, AI workflow execution, review actions, and background jobs.
+- Require explicit acknowledgement of limitations and missing-data considerations before approval, override, or rejection.
+
+### Deployment and operations
+
+- Keep secrets only in environment-managed configuration; never commit API keys or production credentials.
+- Use environment parity across local, staging, and production for database, broker, static files, and AI provider settings.
+- Validate startup configuration for required production values such as `DJANGO_SECRET_KEY`, allowed hosts, trusted origins, database, Redis, and AI provider credentials.
+- Run migrations, health checks, rollback steps, and post-deploy recommendation smoke tests for every release.
+
+### Observability and reliability
+
+- Separate compliance audit events from diagnostic logs.
+- Avoid logging raw PHI, PII, genomic data, prompts, or model responses unless explicitly required and protected.
+- Track recommendation generation success, provider fallback rate, provider latency, malformed AI responses, review turnaround time, and high-risk missing-data patterns.
+- Add alerts for degraded AI provider behavior, repeated workflow failures, and unsafe configuration drift.
+
+### Testing and validation
+
+- Keep deterministic unit tests for domain logic and serializer validation.
+- Add integration tests for patient ingestion, recommendation generation, Gemini fallback, review decisions, audit-event creation, and permission boundaries.
+- Validate low-confidence, incomplete-data, conflicting-data, and provider-failure paths before expanding clinical scope.
+- Use synthetic or de-identified fixtures only.
 
 ---
 
