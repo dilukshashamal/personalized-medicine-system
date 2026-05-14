@@ -1,6 +1,9 @@
 import uuid
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 
 
 class PatientProfile(models.Model):
@@ -15,6 +18,14 @@ class PatientProfile(models.Model):
 		INTERSEX = 'intersex', 'Intersex'
 		UNKNOWN = 'unknown', 'Unknown'
 
+	class ConsentStatus(models.TextChoices):
+		PENDING_REVIEW = 'pending_review', 'Pending Review'
+		GRANTED = 'granted', 'Granted'
+		ACTIVE = 'active', 'Active'
+		CONSENTED = 'consented', 'Consented'
+		DENIED = 'denied', 'Denied'
+		REVOKED = 'revoked', 'Revoked'
+
 	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 	external_id = models.CharField(max_length=100, unique=True)
 	date_of_birth = models.DateField(blank=True, null=True)
@@ -28,7 +39,11 @@ class PatientProfile(models.Model):
 		choices=SexAtBirth.choices,
 		default=SexAtBirth.UNKNOWN,
 	)
-	consent_status = models.CharField(max_length=50, default='pending_review')
+	consent_status = models.CharField(
+		max_length=50,
+		choices=ConsentStatus.choices,
+		default=ConsentStatus.PENDING_REVIEW,
+	)
 	diagnoses = models.JSONField(default=list, blank=True)
 	comorbidities = models.JSONField(default=list, blank=True)
 	medications = models.JSONField(default=list, blank=True)
@@ -36,6 +51,12 @@ class PatientProfile(models.Model):
 	lifestyle_factors = models.JSONField(default=dict, blank=True)
 	disease_progression_summary = models.JSONField(default=dict, blank=True)
 	clinical_notes_summary = models.TextField(blank=True)
+	authorized_users = models.ManyToManyField(
+		settings.AUTH_USER_MODEL,
+		blank=True,
+		related_name='authorized_patient_profiles',
+		help_text='Users explicitly authorized to access this patient record.',
+	)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
@@ -44,3 +65,8 @@ class PatientProfile(models.Model):
 
 	def __str__(self):
 		return f'Patient {self.external_id}'
+
+	def clean(self):
+		super().clean()
+		if self.date_of_birth and self.date_of_birth > timezone.localdate():
+			raise ValidationError({'date_of_birth': 'Date of birth cannot be in the future.'})

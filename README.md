@@ -4,7 +4,7 @@
 
 Helixora AI is a personalized medicine platform concept focused on helping clinicians, researchers, and healthcare innovators generate more targeted treatment recommendations using a patient’s **genetic makeup**, **lifestyle factors**, and **disease progression data**.
 
-The vision is simple: move beyond one-size-fits-all care and support a future where treatment decisions are informed by each individual’s biology and real-world health context.
+The vision is simple: move beyond one-size-fits-all care and support treatment decisions informed by each individual’s biology and real-world health context.
 
 ![Helixora AI](image/img1.png)
 
@@ -32,47 +32,39 @@ The vision is simple: move beyond one-size-fits-all care and support a future wh
 - [Benefits](#benefits)
 - [Product Vision](#product-vision)
 - [Responsible AI and Compliance Considerations](#responsible-ai-and-compliance-considerations)
-- [Future Enhancements](#future-enhancements)
+- [Production Hardening Controls](#production-hardening-controls)
 - [Project Status](#project-status)
-- [License](#license)
 
 ---
 
 ## Current Development Status
 
-Helixora AI is now initialized as a backend-first Django project focused on safe, auditable clinical decision support foundations.
+Helixora AI is a backend-first Django project focused on safe, auditable clinical decision-support foundations.
 
-### Implemented so far
+### Implemented foundation
 
-- Django project scaffold created under `config/`
-- Domain-oriented app structure created under `apps/`
-- Django REST Framework added for API development
-- Celery configured for background task orchestration
-- Base health endpoint added at `api/v1/health/`
-- Initial database migrations applied successfully
-- Python virtual environment and dependency management set up
-- `.gitignore` added for Python, Django, and local environment artifacts
-
-### Current focus
-
-The project is currently in the **platform foundation phase**. The next implementation priority is defining the first high-trust domain models and workflows for:
-
-- patient profiles
-- genomic insights
-- treatment recommendations
-- clinician review states
-- audit events
+- Django project configuration under `config/`
+- Domain-oriented apps under `apps/`
+- Django REST Framework API contracts
+- Celery integration for background task orchestration
+- Public health endpoint at `api/v1/health/`
+- Protected operational health endpoint at `api/v1/ops/health/`
+- Domain models and migrations for patient profiles, genomic insights, treatment recommendations, clinical reviews, and audit events
+- Consent-gated recommendation workflow with placeholder and Gemini provider support
+- Role-aware, patient-scoped clinical API, Django admin, and protected workspace access
+- Append-only audit-event protections through normal application paths
+- Production settings validation, CI checks, pinned direct dependencies, and local deployment gate script
 
 ---
 
 ## Technology Stack
 
-The current backend stack is:
+The backend stack is:
 
 - **Django** for core application structure, ORM, auth, and admin support
 - **Django REST Framework** for validated API contracts
 - **Celery** for asynchronous workflow execution
-- **Redis** as the planned Celery broker/result backend
+- **Redis** as the Celery broker/result backend
 - **SQLite** for initial local development
 
 This stack was chosen to support:
@@ -81,13 +73,13 @@ This stack was chosen to support:
 - clinician review workflows
 - auditability and traceability
 - structured API validation
-- future asynchronous AI recommendation processing
+- asynchronous AI recommendation processing
 
 ---
 
 ## Backend Project Structure
 
-Current backend layout:
+Backend layout:
 
 ```text
 manage.py
@@ -139,25 +131,54 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-### 2. Install dependencies
+On macOS or Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Configure local environment
+
+```bash
+cp .env.example .env
+```
+
+For local development, keep secrets in `.env` only. Use `HELIXORA_AI_PROVIDER=placeholder` unless you explicitly need to test a configured AI provider.
+
+### 3. Install dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-### 3. Run migrations
+### 4. Run migrations
 
 ```powershell
 python manage.py migrate
 ```
 
-### 4. Start the development server
+### 5. Run validation
+
+```powershell
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test
+```
+
+For deployment-style validation, provide production-safe environment values and run:
+
+```bash
+python scripts/check.py
+```
+
+### 6. Start the development server
 
 ```powershell
 python manage.py runserver
 ```
 
-### 5. Verify the health endpoint
+### 7. Verify the health endpoint
 
 Open:
 
@@ -168,14 +189,15 @@ Expected response:
 ```json
 {
   "status": "ok",
-  "service": "helixora-api",
-  "framework": "django-drf-celery"
+  "service": "helixora-api"
 }
 ```
 
+Operational health details are available at `api/v1/ops/health/` for authorized staff users.
+
 ### Celery note
 
-Celery is configured in the project, but background workers should be treated as the next operational setup step. A local Redis instance is expected for Celery task execution.
+Celery is configured in the project. Use a Redis-backed broker/result backend for worker execution in non-eager environments.
 
 ---
 
@@ -195,8 +217,8 @@ This project can serve as the foundation for a platform that helps healthcare te
 
 - Which therapies are more likely to be effective for this patient profile?
 - Are there known genetic markers that affect drug response or risk?
-- How should treatment change as disease progression evolves?
-- What lifestyle variables could improve treatment outcomes?
+- How can treatment adapt as disease progression evolves?
+- Which lifestyle variables influence treatment outcomes?
 - How can clinicians receive recommendations with clear rationale rather than black-box outputs?
 
 ---
@@ -227,7 +249,7 @@ Healthcare providers face a growing challenge:
 4. Clinical workflows are time-constrained.
 5. Existing decision-making systems may not integrate genomic, lifestyle, and progression data in a unified way.
 
-As a result, potentially valuable patient-specific insights can be missed, leading to:
+As a result, valuable patient-specific insights can be missed, leading to:
 
 - delayed optimization of therapy
 - avoidable adverse effects
@@ -258,7 +280,7 @@ This creates a decision-support system that is more adaptive, data-driven, and p
 
 Helixora AI delivers value by helping healthcare organizations and innovators:
 
-- **Improve treatment precision** through patient-specific recommendations
+- **Increase treatment precision** through patient-specific recommendations
 - **Reduce trial-and-error treatment selection**
 - **Support better outcomes** by aligning therapies to biology and behavior
 - **Increase clinician efficiency** by synthesizing complex datasets quickly
@@ -271,12 +293,12 @@ In short, Helixora AI turns fragmented health and genomic data into actionable t
 
 ## Market Opportunity
 
-The market potential for personalized medicine and AI-driven clinical decision support is strong because several healthcare trends are converging:
+The market opportunity for personalized medicine and AI-driven clinical decision support is strong because several healthcare trends are converging:
 
 - Rapid growth in **genomic testing and sequencing adoption**
 - Rising demand for **precision oncology** and disease-specific personalization
 - Expansion of **digital health records** and longitudinal patient monitoring
-- Pressure on healthcare systems to improve outcomes while controlling costs
+- Pressure on healthcare systems to strengthen outcomes while controlling costs
 - Increasing interest in **preventive, predictive, and personalized care models**
 - Strong investment in **AI for healthcare**, especially in diagnostics and treatment optimization
 
@@ -297,9 +319,9 @@ This space has strong market value because the problem is both medically importa
 
 ### 1. Better outcomes create measurable value
 
-When treatment is better matched to the individual, organizations can potentially achieve:
+When treatment is better matched to the individual, organizations can achieve:
 
-- improved response rates
+- higher response rates
 - fewer avoidable complications
 - fewer ineffective prescriptions
 - stronger patient adherence
@@ -367,7 +389,7 @@ Helixora AI may create value for multiple user groups:
 
 ## Key Features
 
-Potential product capabilities include:
+Core product capabilities include:
 
 - **Patient profile unification** across clinical, genomic, and lifestyle data
 - **Genetic marker interpretation** for treatment relevance
@@ -377,7 +399,7 @@ Potential product capabilities include:
 - **Explainable recommendation engine** with rationale and evidence references
 - **Longitudinal monitoring** for treatment updates over time
 - **Clinician review workflow** for approval and adjustment
-- **Population-level insights** for research and quality improvement
+- **Population-level insights** for research and quality analytics
 
 ---
 
@@ -407,20 +429,20 @@ Support cohort stratification, biomarker-driven research, and treatment outcome 
 
 ## How It Works
 
-At a high level, Helixora AI can be envisioned as the following workflow:
+At a high level, Helixora AI follows this workflow:
 
 1. **Collect data** from clinical systems, patient-reported inputs, genomic reports, and wearable or monitoring sources.
 2. **Normalize and structure data** into a unified patient representation.
 3. **Analyze biomarkers and contextual variables** using AI and rules-based medical logic.
 4. **Generate personalized treatment options** with supporting rationale.
 5. **Present recommendations to clinicians or researchers** through a usable interface.
-6. **Track outcomes over time** and improve future recommendations.
+6. **Track outcomes over time** and refine recommendation quality.
 
 ---
 
 ## Data Inputs
 
-Potential data categories include:
+Supported data categories include:
 
 - demographic data
 - medical history
@@ -437,7 +459,7 @@ Potential data categories include:
 
 ## Expected Outputs
 
-The system may generate:
+The system generates structured decision-support output such as:
 
 - personalized treatment plan suggestions
 - ranked therapy options
@@ -455,23 +477,23 @@ The system may generate:
 ### For Patients
 
 - more individualized care
-- potentially improved treatment effectiveness
+- better treatment effectiveness
 - reduced exposure to unsuitable therapies
 - better engagement through personalized recommendations
 
 ### For Clinicians
 
 - faster synthesis of complex patient data
-- improved decision support
+- stronger decision support
 - greater confidence in treatment personalization
 - explainable recommendations that fit real workflows
 
 ### For Healthcare Organizations
 
-- improved care quality
-- potential cost reduction from better treatment matching
+- higher care quality
+- cost reduction opportunities from better treatment matching
 - differentiation through advanced precision-care capabilities
-- stronger data-driven innovation potential
+- stronger data-driven innovation capacity
 
 ### For Researchers and Industry
 
@@ -486,7 +508,7 @@ The system may generate:
 
 The long-term vision for Helixora AI is to become a trusted intelligence platform for precision treatment design—bridging genomics, clinical evidence, patient behavior, and AI reasoning into one actionable system.
 
-The platform should be:
+The platform is designed to be:
 
 - **patient-centered**
 - **clinician-guided**
@@ -499,18 +521,18 @@ The platform should be:
 
 ## Responsible AI and Compliance Considerations
 
-Because healthcare is a high-stakes domain, Helixora AI should be built with strong safeguards.
+Because healthcare is a high-stakes domain, Helixora AI uses strong safeguards.
 
 ### Important considerations
 
 - Human oversight must remain central.
-- Recommendations should support, not replace, licensed clinical judgment.
+- Recommendations support, not replace, licensed clinical judgment.
 - Data privacy and security must be enforced.
-- Model outputs should be explainable and auditable.
-- Bias detection and mitigation should be part of the lifecycle.
-- The platform should align with relevant healthcare and privacy regulations.
+- Model outputs must be explainable and auditable.
+- Bias detection and mitigation belong in the lifecycle.
+- The platform must align with relevant healthcare and privacy regulations.
 
-### Areas to plan for
+### Operating boundaries
 
 - HIPAA or equivalent health-data protections
 - GDPR or regional privacy requirements where applicable
@@ -521,43 +543,89 @@ Because healthcare is a high-stakes domain, Helixora AI should be built with str
 
 ---
 
-## Future Enhancements
+## Production Hardening Controls
 
-Potential future directions:
+Helixora AI includes the following application-level controls in the backend foundation. Real patient deployment still requires separate regulatory, clinical, legal, infrastructure, and security certification outside this repository.
 
-- integration with EHR systems
-- pharmacogenomic recommendation models
-- multi-omics support
-- real-time monitoring from wearables
-- clinician collaboration workflows
-- evidence citation engine
-- outcome feedback loops
-- enterprise-grade analytics dashboards
-- multilingual support for global health deployments
+### Access control and identity
+
+- Clinical API access defaults to deny and is granted through explicit clinical roles, model permissions, or superuser break-glass access.
+- Non-admin clinical users are scoped to patient records they are explicitly authorized to access.
+- The clinical workspace requires an authenticated authorized user.
+- Public landing content is non-sensitive and does not expose patient-linked recommendation drafts.
+- Sensitive API mutations require an authenticated accountable actor.
+
+### Consent and data governance
+
+- Recommendation generation validates consent and persists a durable patient/genomic record before external AI provider calls.
+- The workflow keeps lineage from submitted inputs through generated recommendation, clinical review, and audit events.
+- Fixtures and tests use synthetic data only.
+- Local secrets stay in `.env`; committed configuration uses `.env.example`.
+
+### AI safety and evidence grounding
+
+- Keep AI output bounded to clinical decision support, never autonomous medical advice.
+- Recommendation output is normalized into structured rationale, uncertainty, missing-data flags, contraindication warnings, and clinician-review status.
+- Source evidence, model inference, and suggested clinical actions remain separate in clinician-facing output.
+- Safe fallback behavior is preserved when Gemini or another configured AI provider is unavailable, slow, malformed, or low confidence.
+- Low-confidence and incomplete-data paths remain review-required.
+
+### Audit integrity and review workflow
+
+- AI provider requests, recommendation creation, update, review request, approval, override, and rejection are represented as audit events.
+- Audit history is append-only from normal application paths.
+- Clinical-domain admin screens are patient-scoped for non-admin staff, keep reviewer attribution server-controlled, and disable destructive bulk actions.
+- Correlation IDs are captured across API requests, AI workflow execution, review actions, and background jobs.
+- Approval, override, and rejection require explicit acknowledgement of limitations and missing-data considerations.
+
+### Deployment and operations
+
+- Keep secrets only in environment-managed configuration; never commit API keys or production credentials.
+- Use environment parity across local, staging, and production for database, broker, static files, and AI provider settings.
+- Startup configuration validates required production values such as `DJANGO_SECRET_KEY`, allowed hosts, trusted origins, database, Redis, secure cookies, HTTPS, and AI provider credentials.
+- `scripts/check.py` provides a deployment gate for Django checks, deploy warnings, and production settings validation; local validation and CI also check migration drift.
+- Public health output is intentionally minimal; operational health details are protected.
+
+### Observability and reliability
+
+- Separate compliance audit events from diagnostic logs.
+- Avoid logging raw PHI, PII, genomic data, prompts, or model responses unless explicitly required and protected.
+- Diagnostic logs carry correlation IDs and redact sensitive structured values.
+- Health endpoints separate public liveness from protected operational details.
+
+### Testing and validation
+
+- Keep deterministic unit tests for domain logic and serializer validation.
+- Integration tests cover patient ingestion, recommendation generation, Gemini fallback, review decisions, audit-event creation, and permission boundaries.
+- Validation covers low-confidence, incomplete-data, conflicting-data, and provider-failure paths.
+- Use synthetic or de-identified fixtures only.
 
 ---
 
 ## Project Status
 
-### Current status
+### Status
 
-**Active early-stage backend development**
+**Production-hardening backend foundation**
 
-The repository currently includes:
+The repository includes:
 
 - project vision and product framing
 - healthcare-focused AI guardrail planning
-- Django backend scaffold
-- API and Celery foundation
-- initial local database setup
+- Django backend with domain models for patients, genomics, recommendations, clinical reviews, and audit events
+- Django REST Framework API and Django admin with role-aware, patient-scoped clinical access controls
+- consent-gated AI recommendation workflow with durable pre-provider validation, safe placeholder fallback, and Gemini provider support
+- append-only audit-event protections through normal application paths
+- production settings validation, pinned direct dependencies, CI checks, and local deployment gate script
 
-### In progress next
+### Hardening boundaries
 
-- core data models
-- recommendation schema design
-- clinician review workflow implementation
-- audit event modeling
-- safe recommendation generation pipeline
+- The public landing page is non-sensitive; clinical workspace access requires an authenticated authorized clinical user.
+- Non-admin clinical users only see explicitly assigned patient records and related genomic, recommendation, review, and audit rows across the API, workspace, and admin surfaces.
+- Public health output is intentionally minimal; operational health details are protected.
+- Raw recommendation creation and deletion are not exposed through the API; recommendation generation goes through the guarded workflow.
+- Clinical review reviewer identity and review timestamp are server-controlled.
+- This codebase is not a substitute for regulatory, clinical, legal, infrastructure, or security certification before real patient deployment.
 
 ### Guiding implementation principle
 

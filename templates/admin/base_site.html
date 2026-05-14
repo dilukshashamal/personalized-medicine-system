@@ -1,9 +1,14 @@
-{% extends "admin/base.html" %} {% load i18n static %} {% block title %}{% if
-subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{
-site_title|default:_('Django site admin') }}{% endblock %} {% block extrastyle
-%} {{ block.super }}
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
 <link rel="stylesheet" href="{% static 'admin/helixora_admin.css' %}" />
-{% endblock %} {% block branding %}
+{% endblock %}
+
+{% block branding %}
 <a
   class="helixora-admin-brand"
   href="{% url 'admin:index' %}"
@@ -15,10 +20,14 @@ site_title|default:_('Django site admin') }}{% endblock %} {% block extrastyle
     <small>Clinical operations</small>
   </span>
 </a>
-{% endblock %} {% block usertools %}
+{% endblock %}
+
+{% block usertools %}
 <div class="helixora-admin-actions">
   <a href="/" class="helixora-admin-actions__link">Home</a>
   <a href="/workspace/" class="helixora-admin-actions__link">Workspace</a>
   {{ block.super }}
 </div>
-{% endblock %} {% block nav-global %}{% endblock %}
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
